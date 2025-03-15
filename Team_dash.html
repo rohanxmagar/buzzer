@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Dashboard</title>
-    <meta name="theme-color" id="themeColor" content="#1e223f"> 
     <link rel="stylesheet" href="Team_dash.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <meta name="theme-color" id="themeColor" content="#1e223f"> 
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
@@ -26,70 +26,15 @@
     <div class="buzzer-container">
         <div class="buzzer-base">
             <div class="buzzer-button">
-                <div class="metal-ring" onclick="pressBuzzer()"></div>
+                <div class="metal-ring" id="metalRing" onclick="pressBuzzer()"></div>
             </div>
         </div>
         <h1>Press the <span class="highlight">Buzzer</span>!</h1>
         <p id="buzzerStatus">Waiting to buzz...</p>
+        <p id="blockedMessage" style="display: none; color: red; font-weight: bold;">🚫 Buzzer is Blocked!</p>
         <div id="stopwatch">⏱️ 0 ms</div>
     </div>
 </div>
-
-<script>
-    const socket = io('http://localhost:5500');
-    const teamName = sessionStorage.getItem('teamName') || "Team_X";
-    document.getElementById('teamNameDisplay').textContent = `Team: ${teamName}`;
-
-    let buzzerPressed = false;
-    let startTime = performance.now();
-    let currentDisplayedTime = 0;
-
-    function updateStopwatch() {
-        if (!buzzerPressed) {
-            currentDisplayedTime = Math.floor(performance.now() - startTime);
-            document.getElementById('stopwatch').textContent = `⏱️ ${currentDisplayedTime} ms`;
-            requestAnimationFrame(updateStopwatch);
-        }
-    }
-
-    function startStopwatch() {
-        startTime = performance.now();
-        buzzerPressed = false;
-        currentDisplayedTime = 0;
-        requestAnimationFrame(updateStopwatch);
-    }
-
-    startStopwatch();
-
-    function pressBuzzer() {
-        if (buzzerPressed) return;
-        buzzerPressed = true;
-        const exactTime = currentDisplayedTime;  // Use the last updated stopwatch time
-        document.getElementById('buzzerStatus').textContent = `⏳ Buzzer Pressed at ${exactTime} ms!`;
-        socket.emit('buzzerPressed', { teamName, timestamp: exactTime });
-    }
-
-    socket.on('resetBuzzer', () => {
-        buzzerPressed = false;
-        document.getElementById('buzzerStatus').textContent = '✅ Ready to buzz!';
-        startStopwatch();
-    });
-
-  // ✅ Toggle Mobile Menu
-  const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-
-    hamburger.addEventListener('click', () => {
-        navLinks.classList.toggle('open');
-        hamburger.classList.toggle('toggle');
-    });
-
-    function closeMenu() {
-        navLinks.classList.remove('open');
-        hamburger.classList.remove('toggle');
-    }
-    
-</script>
-
+<script src="Team_dash.js"></script>
 </body>
 </html>
