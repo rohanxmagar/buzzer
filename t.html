@@ -1,198 +1,151 @@
+<!-- Define the document type and HTML version -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <!-- Character encoding for proper text display -->
     <meta charset="UTF-8">
+    <!-- Responsive design settings for mobile compatibility -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title of the webpage -->
     <title>Team Dashboard</title>
-    <link rel="shortcut icon" href="bell.png" type="image/x-icon">
+    <!-- Theme color for browser UI customization -->
+    <meta name="theme-color" id="themeColor" content="#1e223f"> 
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="Team_dash.css">
+    <!-- Include Socket.io library for real-time communication -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            justify-content: center;
-        }
-
-        .navbar {
-            width: 100%;
-            padding: 15px;
-            background: #4CAF50;
-            color: white;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .logout-button {
-            float: right;
-            margin-right: 20px;
-            padding: 8px 16px;
-            background: #FF5733;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .buzzer-container {
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        .buzzer-btn {
-            padding: 20px 40px;
-            font-size: 2rem;
-            cursor: pointer;
-            border: none;
-            border-radius: 12px;
-            background-color: #4CAF50;
-            color: white;
-            transition: background 0.3s;
-        }
-
-        .buzzer-btn:disabled {
-            background-color: #999;
-            cursor: not-allowed;
-        }
-
-        .buzzer-btn:hover:not(:disabled) {
-            background-color: #45a049;
-        }
-
-        #buzzerStatus {
-            margin-top: 20px;
-            font-size: 1.2rem;
-        }
-
-        #stopwatch {
-            font-size: 2rem;
-            margin-top: 20px;
-            color: #ff4500;
-            display: none;
-        }
-    </style>
 </head>
-
 <body>
 
-    <!-- Navbar -->
-    <div class="navbar">
-        <span id="teamNameDisplay">Team Dashboard</span>
-        <button class="logout-button" onclick="logout()">Logout</button>
-    </div>
+<!-- Background container for styling -->
+<div class="background">
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <!-- Display team name -->
+        <div class="teamName" id="teamNameDisplay"></div>
+        <!-- Hamburger menu for mobile navigation -->
+        <div class="hamburger" id="hamburger">
+            <div class="line1"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+        <!-- Navigation links -->
+        <ul class="nav-links" id="navLinks">
+            <li><button class="join-button" onclick="logout()">Logout</button></li>
+        </ul>
+    </nav>
 
-    <!-- Buzzer Section -->
+    <!-- Buzzer section -->
     <div class="buzzer-container">
-        <h1>Press the Buzzer!</h1>
-        <button id="buzzer" class="buzzer-btn" onclick="pressBuzzer()" disabled>🔔 Buzz!</button>
-        <p id="buzzerStatus">Waiting for admin to activate...</p>
+        <div class="buzzer-base">
+            <div class="buzzer-button">
+                <!-- Clickable metal ring to press the buzzer -->
+                <div class="metal-ring" onclick="pressBuzzer()"></div>
+            </div>
+        </div>
+        <h1>Press the <span class="highlight">Buzzer</span>!</h1>
+        <p id="buzzerStatus">Waiting to buzz...</p>
         <div id="stopwatch">⏱️ 0 ms</div>
     </div>
+</div>
 
-    <script>
-        // ✅ Initialize Socket.io (Local or Deployed Environment)
-        const socket = io(
-            window.location.hostname === 'localhost'
-                ? 'http://localhost:3000'
-                : 'https://quickbuzz-dtle.onrender.com'
-        );
+<script>
+    // ✅ Initialize Socket.io (Local or Deployed Environment)
+    const socket = io(
+        window.location.hostname === 'localhost'
+            ? 'http://localhost:3000'
+            : 'https://quickbuzz-dtle.onrender.com'
+    );
 
-        // ✅ Fetch Team Data from Session Storage
-        const teamName = sessionStorage.getItem('teamName') || "Team_X";
-        document.getElementById('teamNameDisplay').textContent = `Team: ${teamName}`;
+    // ✅ Fetch Team Data from Session Storage
+    const teamName = sessionStorage.getItem('teamName') || "Team_X";
+    document.getElementById('teamNameDisplay').textContent = `Team: ${teamName}`;
 
-        // Stopwatch Variables
-        let buzzerPressed = false;
-        let startTime = 0;
-        let stopwatchInterval;
+    let buzzerPressed = false;
+    let startTime = performance.now();
+    let currentDisplayedTime = 0;
 
-        // ⏱️ Start Stopwatch when Buzzer is Active
-        function startStopwatch() {
-            startTime = performance.now();
-            const stopwatch = document.getElementById('stopwatch');
-            stopwatch.style.display = 'block';
-
-            stopwatchInterval = setInterval(() => {
-                if (!buzzerPressed) {
-                    const elapsedTime = performance.now() - startTime;
-                    stopwatch.textContent = `⏱️ ${Math.floor(elapsedTime)} ms`;
-                }
-            }, 1);
+    // ⏱️ Start Stopwatch when Buzzer is Active
+    function updateStopwatch() {
+        if (!buzzerPressed) {
+            currentDisplayedTime = Math.floor(performance.now() - startTime);
+            document.getElementById('stopwatch').textContent = `⏱️ ${currentDisplayedTime} ms`;
+            requestAnimationFrame(updateStopwatch);
         }
-
-        // 🛎️ Handle Buzzer Press (Send Directly to Admin via Socket.io)
-        function pressBuzzer() {
-    if (buzzerPressed) return;
-
-    buzzerPressed = true;
-    document.getElementById('buzzer').disabled = true;
-
-    const elapsedTime = Math.floor(performance.now() - startTime); // Get time in milliseconds
-    document.getElementById('buzzerStatus').textContent = `⏳ Buzzer Pressed at ${elapsedTime} ms! Waiting for admin...`;
-
-    // Send Data to Backend with Properly Formatted Time
-    socket.emit('buzzerPressed', { teamName, elapsedTime });
-
-    clearInterval(stopwatchInterval);
-}
-
-
-        // 🔄 Listen for Reset Event from Admin
-        socket.on('resetBuzzer', () => {
-            buzzerPressed = false;
-            document.getElementById('buzzer').disabled = true;
-            document.getElementById('buzzerStatus').textContent = '🔁 Waiting for admin to activate buzzer!';
-            document.getElementById('stopwatch').style.display = 'none';
-            clearInterval(stopwatchInterval);
-        });
-
-        // 🔄 Listen for Activate Buzzer Event from Admin
-        socket.on('activateBuzzer', () => {
-            buzzerPressed = false;
-            document.getElementById('buzzer').disabled = false;
-            document.getElementById('buzzerStatus').textContent = '✅ Ready to buzz!';
-            startStopwatch();
-        });
-
-        // 🔄 Listen for Deactivate Buzzer Event from Admin
-        socket.on('deactivateBuzzer', () => {
-            buzzerPressed = true;
-            document.getElementById('buzzer').disabled = true;
-            document.getElementById('buzzerStatus').textContent = '❌ Buzzer Deactivated by Admin!';
-            clearInterval(stopwatchInterval);
-        });
-
-        // 🔒 Logout Function
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-        }
-        // 🔄 Listen for leaderboard updates from the server
-// 🔄 Listen for leaderboard updates from the server
-socket.on("updateLeaderboard", (leaderboard) => {
-    console.log("Received Leaderboard Update:", leaderboard); // ✅ Debugging
-
-    // Find the team's position
-    const teamEntry = leaderboard.find(entry => entry.teamName === teamName);
-    
-    if (teamEntry) {
-        document.getElementById('buzzerStatus').textContent = `🎉 Your Position: ${teamEntry.position}`;
     }
-});
-// 🔄 Listen for position update from the server
-socket.on("yourPosition", (position) => {
-    document.getElementById('buzzerStatus').textContent = `🎉 Your Position: ${position}`;
-});
 
+    function startStopwatch() {
+        startTime = performance.now();
+        buzzerPressed = false;
+        currentDisplayedTime = 0;
+        requestAnimationFrame(updateStopwatch);
+    }
 
-    </script>
+    startStopwatch();
+
+    // 🛎️ Handle Buzzer Press (Send Directly to Admin via Socket.io)
+    function pressBuzzer() {
+        if (buzzerPressed) return;
+        buzzerPressed = true;
+        const exactTime = currentDisplayedTime;
+        document.getElementById('buzzerStatus').textContent = `⏳ Buzzer Pressed at ${exactTime} ms!`;
+        socket.emit('buzzerPressed', { teamName, timestamp: exactTime });
+    }
+
+    // 🔄 Listen for Reset Event from Admin
+    socket.on('resetBuzzer', () => {
+        buzzerPressed = false;
+        document.getElementById('buzzerStatus').textContent = '✅ Ready to buzz!';
+        startStopwatch();
+    });
+
+    // 🔄 Listen for Activate Buzzer Event from Admin
+    socket.on('activateBuzzer', () => {
+        buzzerPressed = false;
+        document.getElementById('buzzerStatus').textContent = '✅ Ready to buzz!';
+        startStopwatch();
+    });
+
+    // 🔄 Listen for Deactivate Buzzer Event from Admin
+    socket.on('deactivateBuzzer', () => {
+        buzzerPressed = true;
+        document.getElementById('buzzerStatus').textContent = '❌ Buzzer Deactivated by Admin!';
+    });
+
+    // 🔄 Listen for leaderboard updates from the server
+    socket.on("updateLeaderboard", (leaderboard) => {
+        console.log("Received Leaderboard Update:", leaderboard);
+        const teamEntry = leaderboard.find(entry => entry.teamName === teamName);
+        if (teamEntry) {
+            document.getElementById('buzzerStatus').textContent = `🎉 Your Position: ${teamEntry.position}`;
+        }
+    });
+
+    // 🔄 Listen for position update from the server
+    socket.on("yourPosition", (position) => {
+        document.getElementById('buzzerStatus').textContent = `🎉 Your Position: ${position}`;
+    });
+
+    // 🔒 Logout Function
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    // ✅ Toggle Mobile Menu
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+        hamburger.classList.toggle('toggle');
+    });
+
+    function closeMenu() {
+        navLinks.classList.remove('open');
+        hamburger.classList.remove('toggle');
+    }
+</script>
 
 </body>
-
 </html>
