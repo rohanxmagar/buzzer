@@ -7,94 +7,46 @@
     <title>Team Dashboard</title>
     <link rel="shortcut icon" href="bell.png" type="image/x-icon">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            justify-content: center;
-        }
-
-        .navbar {
-            width: 100%;
-            padding: 15px;
-            background: #4CAF50;
-            color: white;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .logout-button {
-            float: right;
-            margin-right: 20px;
-            padding: 8px 16px;
-            background: #FF5733;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .buzzer-container {
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        .buzzer-btn {
-            padding: 20px 40px;
-            font-size: 2rem;
-            cursor: pointer;
-            border: none;
-            border-radius: 12px;
-            background-color: #4CAF50;
-            color: white;
-            transition: background 0.3s;
-        }
-
-        .buzzer-btn:disabled {
-            background-color: #999;
-            cursor: not-allowed;
-        }
-
-        .buzzer-btn:hover:not(:disabled) {
-            background-color: #45a049;
-        }
-
-        #buzzerStatus {
-            margin-top: 20px;
-            font-size: 1.2rem;
-        }
-
-        #stopwatch {
-            font-size: 2rem;
-            margin-top: 20px;
-            color: #ff4500;
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="t.css">
 </head>
 
 <body>
 
-    <!-- Navbar -->
+    <!-- Navbar 
     <div class="navbar">
         <span id="teamNameDisplay">Team Dashboard</span>
         <button class="logout-button" onclick="logout()">Logout</button>
-    </div>
-
-    <!-- Buzzer Section -->
+    </div> -->
+    <div class="background">
+        <nav class="navbar">
+            <div class="teamName" id="teamNameDisplay"></div>
+            <div class="hamburger" id="hamburger">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><button class="join-button" onclick="logout()">Logout</button></li>
+            </ul>
+        </nav>
+    <!-- Buzzer Section
     <div class="buzzer-container">
         <h1>Press the Buzzer!</h1>
         <button id="buzzer" class="buzzer-btn" onclick="pressBuzzer()" disabled>🔔 Buzz!</button>
         <p id="buzzerStatus">Waiting for admin to activate...</p>
         <div id="stopwatch">⏱️ 0 ms</div>
+    </div>-->
+    <div class="buzzer-container">
+        <div class="buzzer-base">
+            <div class="buzzer-button">
+                <button id="buzzer" class="buzzer-btn" onclick="pressBuzzer()" disabled>🔔 Buzz!</button>
+            </div>
+        </div>
+        <h1>Press the <span class="highlight">Buzzer</span>!</h1>
+        <p id="buzzerStatus">Waiting for admin to activate...</p>
+        <div id="stopwatch">⏱️ 0 ms</div>
     </div>
-
+    
     <script>
         // ✅ Initialize Socket.io (Local or Deployed Environment)
         const socket = io(
@@ -165,13 +117,26 @@ socket.on("deactivateBuzzer", () => {
     document.getElementById("buzzer").disabled = true;
     document.getElementById("buzzerStatus").textContent = "❌ Buzzer Deactivated by Admin!";
 });
+// ✅ Toggle Mobile Menu
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
 
+hamburger.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+    hamburger.classList.toggle('toggle');
+});
 
-        // 🔒 Logout Function
-        function logout() {
-            sessionStorage.clear();
-            window.location.href = 'index.html';
-        }
+function closeMenu() {
+    navLinks.classList.remove('open');
+    hamburger.classList.remove('toggle');
+}
+
+// 🔒 Logout Function
+function logout() {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+}
+
         // 🔄 Listen for leaderboard updates from the server
 // 🔄 Listen for leaderboard updates from the server
 socket.on("updateLeaderboard", (leaderboard) => {
@@ -189,12 +154,6 @@ socket.on("updateLeaderboard", (leaderboard) => {
 socket.on('yourPosition', (position) => {
     document.getElementById('buzzerStatus').textContent = `🎉 Your Position: ${position}`;
 });
-
-
-
-
     </script>
-
 </body>
-
 </html>
