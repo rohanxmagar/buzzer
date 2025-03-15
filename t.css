@@ -1,11 +1,16 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f5f5f5;
+    background: #1e223f;
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100vh;
+    height: 10vh;
     justify-content: center;
 }
 
@@ -37,17 +42,6 @@ nav{
     position: fixed;
     z-index: 10;
 }
-
-/*Styling logo*/
-.logo{
-    padding:1vh 1vw;
-    text-align: center;
-}
-.logo img {
-    height: 3rem;
-    width: 7rem;
-}
-
 /*Styling Links*/
 .nav-links{
     display: flex;
@@ -83,19 +77,20 @@ nav{
     color: white;
 }
 .login-button:hover {
-    color: #131418;
+    color: #181313;
     background-color: #f2f5f7;
     border:1.5px solid #f2f5f7;
     transition: all ease-in-out 350ms;
 }
 .join-button{
-    color: #131418;
-    background-color: #19cf68;
-    border: 1.5px solid #19cf68;
+    background-color: #ff4d4d; /* Red color for logout */
+    border: 1.5px solid #ff4d4d;
     border-radius: 2em;
     padding: 0.6rem 0.8rem;
     font-size: 1rem;
     cursor: pointer;
+    color: white;
+    transition: all ease-in-out 350ms;
 }
 .join-button:hover {
     color: #f2f5f7;
@@ -134,18 +129,22 @@ nav{
     }
     .nav-links{
         position: fixed;
-    background: linear-gradient(90deg, #2a2f55, #1e223f); /* Darker gradient blend */
-        height: 100vh;
-        width: 100%;
+        background: linear-gradient(90deg, #2a2f55, #1e223f);
+        height: 3.5em;
+        width: 100vw;
         flex-direction: column;
+        top: 0;
+        left: 0;
+        justify-content: center;
+        align-items: center;
         -webkit-clip-path: circle(50px at 90% -10%);
         clip-path: circle(50px at 90% -20%);
-        transition: all 1s ease-out;
+        transition: all 0.7s ease-out;
         pointer-events: none;
     }
     .nav-links.open{
-        -webkit-clip-path: circle(1000px at 90% -10%);
-        clip-path: circle(1000px at 90% -10%);
+        -webkit-clip-path: circle(200vw at 50% 50%);
+        clip-path: circle(200vw at 50% 50%);
         pointer-events: all;
     }
     .nav-links li{
@@ -190,8 +189,13 @@ nav{
     transform: rotate(45deg) translate(-5px,-6px);
 }
 .buzzer-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    margin-top: 50px;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 .buzzer-btn {
@@ -276,3 +280,21 @@ nav{
 .buzzer-btn:hover:not(:disabled) {
     background-color: #45a049;
 }
+.highlight {
+    color: rgba(85, 255, 0, 0.644);  /* Change color to red */
+    font-weight: bold;  /* Make it bold */
+}
+.teamName {
+    font-size: 24px; /* Adjust size as needed */
+    font-weight: bold;
+    color: #ffd000e6; /* White text */
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 10px 20px;
+    text-align: center;
+    width: fit-content;
+}
+html {
+    background-color: #2a2f55
+}
+

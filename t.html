@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2a2f55">
     <link rel="shortcut icon" href="bell.png" type="image/x-icon">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="t.css">
@@ -56,8 +56,8 @@
         );
 
         // ✅ Fetch Team Data from Session Storage
-        const teamName = sessionStorage.getItem('teamName') || "Team_X ✅";
-        document.getElementById('teamNameDisplay').textContent = `Team: ${teamName} ✅`;
+        const teamName = sessionStorage.getItem('teamName') || "Team_X ";
+        document.getElementById('teamNameDisplay').textContent = `Team: ${teamName} `;
 
         // Stopwatch Variables
 let buzzerPressed = false;
